@@ -9,5 +9,5 @@
 ```bash
 $ <command>
 ```
- </p></details>
+</p></details>
 

@@ -1,6 +1,6 @@
 # Kubernetes Hands-on Lab 1: Setup and the Basics
 
-## Part 1: Setup Lab Environment
+## Part 1: Setup the Lab Environment
 
 ### 1. Download kubectl
 - Windows: `winget install kubectl`
