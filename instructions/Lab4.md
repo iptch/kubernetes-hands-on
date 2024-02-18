@@ -1,4 +1,4 @@
-# Kubernetes Hands-on Lab 3: Monitoring and Debugging
+# Kubernetes Hands-on Lab 4: Monitoring and Debugging
 
 ## Part 1: ...
 

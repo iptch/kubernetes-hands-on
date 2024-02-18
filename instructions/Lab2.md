@@ -139,7 +139,7 @@ kubectl get cm configmap2 -o yaml
 ```
 </p></details>
 
-### 4 Create a configMap called 'options' with the value var5=val5. Create a new nginx pod that loads the value from variable 'var5' in an env variable called 'option'
+### 4. Create a configMap called 'options' with the value var5=val5. Create a new nginx pod that loads the value from variable 'var5' in an env variable called 'option'
 
 Hint: Read https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#define-a-container-environment-variable-with-data-from-a-single-configmap
 <details><summary>solution</summary><p>
@@ -175,7 +175,7 @@ spec:
 
 ```bash
 kubectl create -f pod.yaml
-kubectl exec -it nginx -- env | grep option # will show 'option=val5'
+kubectl exec -it nginx -- sh -c "env | grep option" # will show 'option=val5'
 ```
 </p></details>
 
@@ -192,7 +192,7 @@ kubectl create secret generic mysecret --from-literal=password=mypass
 ```
 </p></details>
 
-### Get the value of mysecret
+### 2. Get the value of mysecret
 <details><summary>solution</summary><p>
 
 ```bash
@@ -204,7 +204,7 @@ certutil -decode input.txt output.txt
 ```
 </p></details>
 
-### Create an nginx pod that mounts the secret mysecret in a volume on path /etc/foo
+### 3. Create an nginx pod that mounts the secret mysecret in a volume on path /etc/foo
 <details><summary>solution</summary><p>
 
 ```bash
@@ -244,7 +244,7 @@ cat /etc/foo/password # shows mypass
 ```
 </p></details>
 
-### Delete the pod you just created and mount the variable 'password' from secret mysecret onto a new nginx pod in env variable called 'PASSWORD'
+### 4. Delete the pod you just created and mount the variable 'password' from secret mysecret onto a new nginx pod in env variable called 'PASSWORD'
 Show the environment variable using `kubectl exec -it nginx -- sh -c "env | grep PASSWORD"`
 <details><summary>solution</summary><p>
 
@@ -280,5 +280,141 @@ spec:
 ```bash
 kubectl create -f pod.yaml
 kubectl exec -it nginx -- sh -c "env | grep PASSWORD"  # will show 'PASSWORD=mypass'
+```
+</p></details>
+
+## [OPTIONAL] Part 4: Liveness, readiness and startup probes
+https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+
+### 1. Create an nginx pod with a liveness probe that just runs the command 'ls'. Save its YAML in pod.yaml. Run it, check its probe status, delete it.
+<details><summary>solution</summary><p>
+
+```bash
+kubectl run nginx --image=nginx --restart=Never --dry-run=client -o yaml > pod.yaml
+```
+
+```YAML
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  containers:
+  - image: nginx
+    imagePullPolicy: IfNotPresent
+    name: nginx
+    resources: {}
+    livenessProbe: # our probe
+      exec: # add this line
+        command: # command definition
+        - ls # ls command
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}
+```
+
+```bash
+kubectl create -f pod.yaml
+
+# Check the probe:
+# On Linux or Mac, run:
+kubectl describe pod nginx | grep -i liveness
+# On Windows, run:
+kubectl describe pod nginx | findstr -I liveness
+
+kubectl delete -f pod.yaml
+```
+</p></details>
+
+### 2. Modify the pod.yaml file so that liveness probe starts kicking in after 5 seconds whereas the interval between probes would be 5 seconds. Run it, check the probe, delete it.
+<details><summary>solution</summary><p>
+
+```bash
+kubectl explain pod.spec.containers.livenessProbe # get the exact names
+```
+
+```YAML
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  containers:
+  - image: nginx
+    imagePullPolicy: IfNotPresent
+    name: nginx
+    resources: {}
+    livenessProbe:
+      initialDelaySeconds: 5 # add this line
+      periodSeconds: 5 # add this line as well
+      exec:
+        command:
+        - ls
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}
+```
+
+```bash
+kubectl create -f pod.yaml
+
+# Check the probe:
+# On Linux or Mac, run:
+kubectl describe pod nginx | grep -i liveness
+# On Windows, run:
+kubectl describe pod nginx | findstr -I liveness
+
+kubectl delete -f pod.yaml
+```
+</p></details>
+
+### 3. Create an nginx pod (that includes port 80) with an HTTP readinessProbe on path '/' on port 80. Again, run it, check the readinessProbe, delete it.
+<details><summary>solution</summary><p>
+
+```bash
+kubectl run nginx --image=nginx --dry-run=client -o yaml --restart=Never --port=80 > pod.yaml
+```
+
+```YAML
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  containers:
+  - image: nginx
+    imagePullPolicy: IfNotPresent
+    name: nginx
+    resources: {}
+    ports:
+      - containerPort: 80 # Note: Readiness probes runs on the container during its whole lifecycle. Since nginx exposes 80, containerPort: 80 is not required for readiness to work.
+    readinessProbe: # declare the readiness probe
+      httpGet: # add this line
+        path: / #
+        port: 80 #
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}
+```
+
+```bash
+kubectl create -f pod.yaml
+
+# Check the probe:
+# On Linux or Mac, run:
+kubectl describe pod nginx | grep -i readiness
+# On Windows, run:
+kubectl describe pod nginx | findstr -I readiness
+
+kubectl delete -f pod.yaml
 ```
 </p></details>
