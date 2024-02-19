@@ -283,7 +283,7 @@ kubectl exec -it nginx -- sh -c "env | grep PASSWORD"  # will show 'PASSWORD=myp
 ```
 </p></details>
 
-## [OPTIONAL] Part 4: Liveness, readiness and startup probes
+## [OPTIONAL] Part 4: Liveness and readiness probes
 https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 
 ### 1. Create an nginx pod with a liveness probe that just runs the command 'ls'. Save its YAML in pod.yaml. Run it, check its probe status, delete it.
