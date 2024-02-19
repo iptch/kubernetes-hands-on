@@ -99,7 +99,7 @@ spec:
     emptyDir: {} 
 ```
 ```bash
-kubectl port-forward pod/init-container-pod 80:80
+kubectl port-forward pod/init-container-pod 8080:80
 ```
 </p></details>
 
