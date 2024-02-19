@@ -86,7 +86,12 @@ kubectl run busybox --restart=Never --image=busybox -- notexist
 kubectl logs busybox # will bring nothing! container never started
 kubectl describe po busybox # in the events section, you'll see the error
 # also...
+
+# On Linux/Mac, run:
 kubectl get events | grep -i error # you'll see the error here as well
+# On Windows, run:
+kubectl get events | findstr -I error
+
 kubectl delete po busybox --force --grace-period=0
 ```
 </p></details>
