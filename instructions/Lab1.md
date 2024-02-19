@@ -24,6 +24,13 @@ K9s is a terminal based UI to interact with your Kubernetes clusters: https://k9
 - Windows: `winget install k9s`
 - Mac: `brew install derailed/k9s/k9s`
 
+### 5. [Optional] View the Kubernetes-Dashboard
+
+```bash
+kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard 8443:443
+```
+Visit: https://127.0.0.1:8443/ 
+
 ## Part 2: The Basics
 
 ### 1. Get the yaml definition of your namespace via kubectl 
