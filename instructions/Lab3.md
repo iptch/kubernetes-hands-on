@@ -50,7 +50,7 @@ Copy all resource in your templates folder.
 
 For reference, here is the helm documentation: https://helm.sh/docs/chart_template_guide/
 
-Taks: Parametrize the all the following attributes:
+Parametrize the all the following attributes:
 
 1. replicaCount of the guestbook-deployment
 2. image and tag used for guestbook
@@ -82,7 +82,7 @@ redis:
 
 ### 3. Conditionals
 
-Create a boolean value in the values.yaml whether the redis-slave should be used or not (set it to `true`). 
+Create a boolean value in the values.yaml whether the redis-slave should be deployed or not (set it to `true`). 
 
 
 <details><summary>solution</summary><p>
