@@ -76,27 +76,24 @@ kind: Pod
 metadata:
   name: init-container-pod
 spec:
-  initContainers: 
-  - args: 
-    - /bin/sh 
-    - -c 
-    - "wget -O /work-dir/index.html http://neverssl.com/online"
-    image: busybox 
-    name: box 
-    volumeMounts: 
-    - name: vol 
-      mountPath: /work-dir 
+  initContainers:
+  - image: busybox
+    name: box
+    command: ['sh', '-c', 'wget -O /work-dir/index.html http://neverssl.com/online']
+    volumeMounts:
+      - name: vol
+        mountPath: /work-dir
   containers:
-  - image: nginx
-    name: nginx
-    ports:
-    - containerPort: 80
-    volumeMounts: 
-    - name: vol 
-      mountPath: /usr/share/nginx/html 
-  volumes: 
-  - name: vol 
-    emptyDir: {} 
+    - image: nginx
+      name: nginx
+      ports:
+        - containerPort: 80
+      volumeMounts:
+        - name: vol
+          mountPath: /usr/share/nginx/html
+  volumes:
+    - name: vol
+      emptyDir: {}
 ```
 ```bash
 kubectl port-forward pod/init-container-pod 8080:80
