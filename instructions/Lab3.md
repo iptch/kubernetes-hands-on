@@ -22,36 +22,7 @@ kubectl delete all --all
 VS Code: https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools
 
 
-## Part 2: Getting started
-
-### 1. List helm deployments
-
-There are already some helm deployments in the cluster. List deployments from all namespaces.
-
-<details><summary>solution</summary><p>
-
-```bash
-helm list -A
-```
-</p></details>
-
-### 2. Metadata
-
-There is already a kubernetes dashboard deployed via helm. Get the metadata information for this helm deployment. (pay attention to the correct namespace)
-
-
-<details><summary>solution</summary><p>
-
-```bash
-helm get metadata kubernetes-dashboard -n kubernetes-dashboard
-```
-
-</p></details>
-
-
-
-
-## Part 3: Parameterize and deploy
+## Part 2: Parameterize and deploy
 
 ### 1. Folder structure
 
