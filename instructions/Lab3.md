@@ -139,7 +139,7 @@ kubectl delete -f pod.yaml
 ## Part 2: Anti-Affinities
 https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
 
-### 1. Use [the nginx deployment from Lab 1](lab1.md#rewrite-deployment): Extend it so that the replicas are scheduled on different nodes.
+### 1. Use [the nginx deployment from Lab 1](Lab1.md#rewrite-deployment): Extend it so that the replicas are scheduled on different nodes.
 <details><summary>solution</summary><p>
 
 ```yaml
