@@ -1,5 +1,0 @@
-apiVersion: v2
-name: guestbook-csb
-description: A Helm chart for a guestbook with redis
-version: 0.1.0
-appVersion: "0.1"

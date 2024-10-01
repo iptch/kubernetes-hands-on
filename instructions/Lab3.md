@@ -1,163 +1,198 @@
-# Kubernetes Hands-on Lab 3: Helm
+# Kubernetes Hands-on Lab 3: High Availability
 
-Helm Commands are documented here: https://helm.sh/docs/helm/helm/#see-also
+## Part 1: Liveness and readiness probes
+https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 
-(This course is based on the IBM Helm 101 Workshop https://ibm.github.io/helm101/)
-
-## Part 1: Prepare lab environment 
-
-### 1. Install Helm
-- Windows: `winget install -e --id Helm.Helm` or `choco install kubernetes-helm` 
-- Mac: `brew install helm`
-- Or read for other possibilities https://helm.sh/docs/intro/install/
-
-
-### 2. Delete all resources in your namespace
-
-```shell
-kubectl delete all --all
-```
-
-### [Optional] 3. Download Kubernetes/Helm plugins 
-VS Code: https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools
-
-
-## Part 2: Parameterize and deploy
-
-### 1. Folder structure
-
-Create a minimal folder structure like the following:
-
-```text
-+-Chart.yaml
-+-templates/
-+-values.yaml
-```
-
-Content for the Chart.yaml:
-```yaml
-apiVersion: v2
-name: guestbook-<your ipt Shortcut>
-description: A Helm chart for a guestbook with redis
-version: 0.1.0
-appVersion: "0.1"
-```
-
-### 2. Parametrize a deployment
-
-There are some prepared resources in the [guestbook-resources](..%2Fguestbook-resources) folder.
-Copy all resource in your templates folder.
-
-For reference, here is the helm documentation: https://helm.sh/docs/chart_template_guide/
-
-Parametrize the all the following attributes:
-
-1. replicaCount of the guestbook-deployment
-2. image and tag used for guestbook
-3. port and type of the guestbook-service
-4. port of the redis services
-
-
+### 1. Create an nginx pod with a liveness probe that just runs the command 'ls'. Save its YAML in pod.yaml. Run it, check its probe status, delete it.
 <details><summary>solution</summary><p>
 
-values.yaml:
-
-```yaml
-replicaCount: 2
-
-image:
-  repository: ibmcom/guestbook
-  tag: v1
-
-service:
-  type: LoadBalancer
-  port: 3000
-
-redis:
-  port: 6379
+```bash
+kubectl run nginx --image=nginx --restart=Never --dry-run=client -o yaml > pod.yaml
 ```
 
+```YAML
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  containers:
+  - image: nginx
+    imagePullPolicy: IfNotPresent
+    name: nginx
+    resources: {}
+    livenessProbe: # our probe
+      exec: # add this line
+        command: # command definition
+        - ls # ls command
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}
+```
+
+```bash
+kubectl create -f pod.yaml
+
+# Check the probe:
+# On Linux or Mac, run:
+kubectl describe pod nginx | grep -i liveness
+# On Windows, run:
+kubectl describe pod nginx | findstr -I liveness
+
+kubectl delete -f pod.yaml
+```
 </p></details>
 
+### 2. Modify the pod.yaml file so that liveness probe starts kicking in after 5 seconds whereas the interval between probes would be 5 seconds. Run it, check the probe, delete it.
+<details><summary>solution</summary><p>
 
-### 3. Conditionals
+```bash
+kubectl explain pod.spec.containers.livenessProbe # get the exact names
+```
 
-Create a boolean value in the values.yaml whether the redis-slave should be deployed or not (set it to `true`). 
+```YAML
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  containers:
+  - image: nginx
+    imagePullPolicy: IfNotPresent
+    name: nginx
+    resources: {}
+    livenessProbe:
+      initialDelaySeconds: 5 # add this line
+      periodSeconds: 5 # add this line as well
+      exec:
+        command:
+        - ls
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}
+```
 
+```bash
+kubectl create -f pod.yaml
 
+# Check the probe:
+# On Linux or Mac, run:
+kubectl describe pod nginx | grep -i liveness
+# On Windows, run:
+kubectl describe pod nginx | findstr -I liveness
+
+kubectl delete -f pod.yaml
+```
+</p></details>
+
+### 3. Create an nginx pod (that includes port 80) with an HTTP readinessProbe on path '/' on port 80. Again, run it, check the readinessProbe, delete it.
+<details><summary>solution</summary><p>
+
+```bash
+kubectl run nginx --image=nginx --dry-run=client -o yaml --restart=Never --port=80 > pod.yaml
+```
+
+```YAML
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  containers:
+  - image: nginx
+    imagePullPolicy: IfNotPresent
+    name: nginx
+    resources: {}
+    ports:
+      - containerPort: 80 # Note: Readiness probes runs on the container during its whole lifecycle. Since nginx exposes 80, containerPort: 80 is not required for readiness to work.
+    readinessProbe: # declare the readiness probe
+      httpGet: # add this line
+        path: / #
+        port: 80 #
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}
+```
+
+```bash
+kubectl create -f pod.yaml
+
+# Check the probe:
+# On Linux or Mac, run:
+kubectl describe pod nginx | grep -i readiness
+# On Windows, run:
+kubectl describe pod nginx | findstr -I readiness
+
+kubectl delete -f pod.yaml
+```
+</p></details>
+
+## Part 2: Anti-Affinities
+https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+
+### 1. Use [the nginx deployment from Lab 1](lab1.md#rewrite-deployment): Extend it so that the replicas are scheduled on different nodes.
 <details><summary>solution</summary><p>
 
 ```yaml
-{{- if .Values.redis.slaveEnabled }}
 apiVersion: apps/v1
 kind: Deployment
-...
-{{- end }}
-```
-The same for the redis-slave-service. Full solution can be found here: [guestbook-solution](..%2Fhelm-solutions%2Fguestbook-solution)
-
-</p></details>
-
-
-### 4. Deploy your chart
-
-Give your helm-deployment a name and put it on the cluster.
-
-Documentation: https://helm.sh/docs/helm/helm_install/
-
-<details><summary>solution</summary><p>
-
-```bash
-helm install my-guestbook .
-```
-</p></details>
-
-
-### 5. View you deployment
-
-1. Have a look at the resources that are created (pods, services, deployments)
-2. Look up the external IP of the guestbook-service
-3. View the created guestbook page in the browser (use http and the port configured in the service e.g. http://20.86.218.180:3000/)
-4. Find out the external ip address of someone elses guestbook and leave him a nice comment (if you are the first one, you need to help someone else first)
-
-<details><summary>solution</summary><p>
-
-```bash
-# get you own external ip:
-kubectl get services -o wide
-
-# get all services and find another service with a external IP
-kubectl get services -A
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - nginx
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - image: nginx
+        name: nginx
+        ports:
+        - containerPort: 80
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
 ```
 </p></details>
 
-
-### 6. Update your helm chart
-
-You currently have a master and a slave redis database. 
-Disable the slave via the attribute in the values.yaml (configured in Task 3).
-
-Now update your deployment so that the changes become active.
-Also have a look at the resources with kubectl.
-
+### 2. Check if the pods from the previous task are indeed scheduled on different nodes.
 <details><summary>solution</summary><p>
+Get the pods by their label and use the "wide" output format to display the nodes as well. Then check if the nodes in the node column are different or exactly the same.
 
 ```bash
-helm upgrade my-guestbook .
-kubectl get all
+kubectl get pods -l "app=nginx" -o wide
 ```
 </p></details>
 
-
-### 7. View the history and roll back
-
-First view the history of your helm chart, then rollback to revision 1 and view the history again
-
+### 3. To how many replicas do you have to scale the deployment until they can't be scheduled on different nodes anymore?
 <details><summary>solution</summary><p>
+Check how many nodes there are using the following command:
 
 ```bash
-helm history my-guestbook
-helm rollback my-guestbook 1
-helm history my-guestbook
+kubectl get nodes
 ```
 </p></details>

@@ -89,7 +89,7 @@ kubectl run nginx --image=nginx --port=80 --dry-run=client -o yaml > nginx.yaml
 ```
 </p></details>
 
-### 7. Rewrite the yaml file from a pod configuration to a deployment named "nginx-deployment" with 2 replicas
+### 7. Rewrite the yaml file from a pod configuration to a deployment named "nginx-deployment" with 2 replicas <a id="rewrite-deployment"></a>
 Hint: Use the pod as the template for the deployment. See how a deployment is configured here: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
 
 Hint 2: You can also use kubectl to create a deployment in dry-run mode and with output as yaml to see how a deployment looks like.
@@ -173,7 +173,7 @@ kubectl port-forward service/nginx-deployment 8080:8080
 </p></details>
 
 
-## [OPTIONAL] Part 4: kubectl explain
+## Part 4: kubectl explain
 You can use `kubectl explain` to find out more about a Kubernetes resource and its fields:
 
 ### 1. Find out more about services using kubectl explain
@@ -199,4 +199,3 @@ kubectl explain pods
 kubectl explain pods.spec.containers
 ```
 </p></details>
-
