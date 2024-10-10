@@ -13,23 +13,33 @@
 ### 3. Run a command to test if it works:
 - `kubectl get namespaces`
 
-### 4. [Optional] Configure: Alias, autocomplete, etc.
+### 4. Create your own namespace:
+- `kubectl create namespace <your name>`
+
+Alternatively, use "ns" instead of "namespace" -> `kubectl create ns <your name>`. Other resources can be shortened as well (e.g. "svc" instead of "service")
+
+### 4. Use your namespace in all kubectl calls:
+- `kubectl config set-context --current --namespace=<your name>`
+
+Alternatively, use the `-n <your name>` flag with every call.
+
+### 5. [Optional] Configure: Alias, autocomplete, etc.
 https://kubernetes.io/docs/reference/kubectl/quick-reference/
 
-### 5. [Optional] Get familiar with kubectl doc and try out commands
+### 6. [Optional] Get familiar with kubectl doc and try out commands
 https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands
 
-### 5. [Optional] Install k9s 
+### 7. [Optional] Install k9s 
 K9s is a terminal based UI to interact with your Kubernetes clusters: https://k9scli.io/
 - Windows: `winget install k9s`
 - Mac: `brew install derailed/k9s/k9s`
 
-### 5. [Optional] View the Kubernetes-Dashboard
+### 8. [Optional] View the Kubernetes-Dashboard
 
 ```bash
 kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard 8443:443
 ```
-Visit: https://127.0.0.1:8443/ 
+Visit https://127.0.0.1:8443/ and login with your config file. Your browser will complain that the certificate is unknown: Press "Advanced" and "Proceed to 127.0.0.1 (unsafe)".
 
 ## Part 2: The Basics
 
