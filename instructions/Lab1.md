@@ -8,7 +8,7 @@
 
 ### 2. Download the config file into the .kube folder in your home directory
 - `~/.kube/config`
-- Hint: The config file configures your namespace as the default namespace. If you don't specify another namespace, your commands will be run in your own namespace and you can omit the "-n" flag to select a namespace. 
+- Hint: The config file configures your namespace as the default namespace. If you don't specify another namespace, your commands will be run in your own namespace and you can omit the "-n" flag to select a namespace.
 
 ### 3. Run a command to test if it works:
 - `kubectl get namespaces`
@@ -18,23 +18,23 @@
 
 Alternatively, use "ns" instead of "namespace" -> `kubectl create ns <your name>`. Other resources can be shortened as well (e.g. "svc" instead of "service")
 
-### 4. Use your namespace in all kubectl calls:
+### 5. Use your namespace in all kubectl calls:
 - `kubectl config set-context --current --namespace=<your name>`
 
 Alternatively, use the `-n <your name>` flag with every call.
 
-### 5. [Optional] Configure: Alias, autocomplete, etc.
+### 6. [Optional] Configure: Alias, autocomplete, etc.
 https://kubernetes.io/docs/reference/kubectl/quick-reference/
 
-### 6. [Optional] Get familiar with kubectl doc and try out commands
+### 7. [Optional] Get familiar with kubectl doc and try out commands
 https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands
 
-### 7. [Optional] Install k9s 
+### 8. [Optional] Install k9s
 K9s is a terminal based UI to interact with your Kubernetes clusters: https://k9scli.io/
 - Windows: `winget install k9s`
 - Mac: `brew install derailed/k9s/k9s`
 
-### 8. [Optional] View the Kubernetes-Dashboard
+### 9. [Optional] View the Kubernetes-Dashboard
 
 ```bash
 kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard 8443:443
@@ -43,7 +43,7 @@ Visit https://127.0.0.1:8443/ and login with your config file. Your browser will
 
 ## Part 2: The Basics
 
-### 1. Get the yaml definition of your namespace via kubectl 
+### 1. Get the yaml definition of your namespace via kubectl
 Hint: Use the "get" command and the output flag as described here: https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#get
 <details><summary>solution</summary><p>
 
@@ -178,7 +178,7 @@ Forward form the service port 8080 to your own port 8080: https://kubernetes.io/
 
 ```bash
 kubectl port-forward service/nginx-deployment 8080:8080
-# Open http://localhost:8080/ in a browser 
+# Open http://localhost:8080/ in a browser
 ```
 </p></details>
 
