@@ -280,138 +280,57 @@ kubectl exec -it nginx -- sh -c "env | grep PASSWORD"  # will show 'PASSWORD=myp
 ```
 </p></details>
 
-## [OPTIONAL] Part 4: Liveness and readiness probes
-https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+## Part 4: Debugging
 
-### 1. Create an nginx pod with a liveness probe that just runs the command 'ls'. Save its YAML in pod.yaml. Run it, check its probe status, delete it.
+### 1. Create a busybox pod that runs the command below. Check its logs.
+The command that should be run is `/bin/sh -c 'i=0; while true; do echo "$i: $(date)"; i=$((i+1)); sleep 1; done'`. 
+
 <details><summary>solution</summary><p>
 
 ```bash
-kubectl run nginx --image=nginx --restart=Never --dry-run=client -o yaml > pod.yaml
-```
-
-```YAML
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  containers:
-  - image: nginx
-    imagePullPolicy: IfNotPresent
-    name: nginx
-    resources: {}
-    livenessProbe: # our probe
-      exec: # add this line
-        command: # command definition
-        - ls # ls command
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-status: {}
-```
-
-```bash
-kubectl create -f pod.yaml
-
-# Check the probe:
-# On Linux or Mac, run:
-kubectl describe pod nginx | grep -i liveness
-# On Windows, run:
-kubectl describe pod nginx | findstr -I liveness
-
-kubectl delete -f pod.yaml
+kubectl run busybox --image=busybox --restart=Never -- /bin/sh -c 'i=0; while true; do echo "$i: $(date)"; i=$((i+1)); sleep 1; done'
+kubectl logs busybox -f # follow the logs
 ```
 </p></details>
 
-### 2. Modify the pod.yaml file so that liveness probe starts kicking in after 5 seconds whereas the interval between probes would be 5 seconds. Run it, check the probe, delete it.
+### 2. Create a busybox pod that runs 'ls /notexist'. Determine if there's an error (of course there is), see it. In the end, delete the pod
+
 <details><summary>solution</summary><p>
 
 ```bash
-kubectl explain pod.spec.containers.livenessProbe # get the exact names
-```
-
-```YAML
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  containers:
-  - image: nginx
-    imagePullPolicy: IfNotPresent
-    name: nginx
-    resources: {}
-    livenessProbe:
-      initialDelaySeconds: 5 # add this line
-      periodSeconds: 5 # add this line as well
-      exec:
-        command:
-        - ls
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-status: {}
-```
-
-```bash
-kubectl create -f pod.yaml
-
-# Check the probe:
-# On Linux or Mac, run:
-kubectl describe pod nginx | grep -i liveness
-# On Windows, run:
-kubectl describe pod nginx | findstr -I liveness
-
-kubectl delete -f pod.yaml
+kubectl run busybox --restart=Never --image=busybox -- /bin/sh -c 'ls /notexist'
+# show that there's an error
+kubectl logs busybox
+kubectl describe po busybox
+kubectl delete po busybox
 ```
 </p></details>
 
-### 3. Create an nginx pod (that includes port 80) with an HTTP readinessProbe on path '/' on port 80. Again, run it, check the readinessProbe, delete it.
+### 3. Create a busybox pod that runs 'notexist'. Determine if there's an error (of course there is), see it. In the end, delete the pod forcefully with a 0 grace period
+
 <details><summary>solution</summary><p>
 
 ```bash
-kubectl run nginx --image=nginx --dry-run=client -o yaml --restart=Never --port=80 > pod.yaml
-```
+kubectl run busybox --restart=Never --image=busybox -- notexist
+kubectl logs busybox # will bring nothing! container never started
+kubectl describe po busybox # in the events section, you'll see the error
+# also...
 
-```YAML
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  containers:
-  - image: nginx
-    imagePullPolicy: IfNotPresent
-    name: nginx
-    resources: {}
-    ports:
-      - containerPort: 80 # Note: Readiness probes runs on the container during its whole lifecycle. Since nginx exposes 80, containerPort: 80 is not required for readiness to work.
-    readinessProbe: # declare the readiness probe
-      httpGet: # add this line
-        path: / #
-        port: 80 #
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-status: {}
+# On Linux/Mac, run:
+kubectl get events | grep -i error # you'll see the error here as well
+# On Windows, run:
+kubectl get events | findstr -I error
+
+kubectl delete po busybox --force --grace-period=0
 ```
+</p></details>
+
+
+### 4. Get CPU/memory utilization of the nodes
+
+<details><summary>solution</summary><p>
 
 ```bash
-kubectl create -f pod.yaml
-
-# Check the probe:
-# On Linux or Mac, run:
-kubectl describe pod nginx | grep -i readiness
-# On Windows, run:
-kubectl describe pod nginx | findstr -I readiness
-
-kubectl delete -f pod.yaml
+kubectl top nodes
 ```
 </p></details>
