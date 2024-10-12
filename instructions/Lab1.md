@@ -8,7 +8,6 @@
 
 ### 2. Download the config file into the .kube folder in your home directory
 - `~/.kube/config`
-- Hint: The config file configures your namespace as the default namespace. If you don't specify another namespace, your commands will be run in your own namespace and you can omit the "-n" flag to select a namespace.
 
 ### 3. Run a command to test if it works:
 - `kubectl get namespaces`
